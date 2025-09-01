@@ -118,10 +118,27 @@ function render() {
     const k = btn.getAttribute("data-sort");
     btn.setAttribute("aria-sort", k === sortKey ? (sortDir === "asc" ? "ascending" : "descending") : "none");
   });
+  
+  updateSortIndicators();
 }
 
 function num(v) { return (v ?? "") === "" ? "" : Number(v).toLocaleString(); }
 function escapeHTML(s) { return String(s).replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
+
+function updateSortIndicators() {
+  // clear all
+  document.querySelectorAll("th").forEach(th => th.classList.remove("active-sort"));
+  document.querySelectorAll("th button[data-sort]").forEach(btn => {
+    const span = btn.querySelector(".sort-indicator");
+    if (span) span.textContent = "";
+    const k = btn.getAttribute("data-sort");
+    btn.setAttribute("aria-sort", k === sortKey ? (sortDir === "asc" ? "ascending" : "descending") : "none");
+    if (k === sortKey) {
+      if (span) span.textContent = sortDir === "asc" ? "▲" : "▼";
+      btn.closest("th")?.classList.add("active-sort");
+    }
+  });
+}
 
 function attachEvents() {
   // sorting
@@ -135,6 +152,7 @@ function attachEvents() {
         sortDir = "desc";
       }
       view.sort((a, b) => cmp(a, b, sortKey, sortDir));
+      updateSortIndicators();
       render();
     });
   });

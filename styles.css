@@ -2,11 +2,26 @@
 * { box-sizing: border-box; }
 body { margin: 0; font-family: Arial, sans-serif; }
 .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
+.table-wrap {
+	width: 100%;
+	overflow-x: auto;   /* horizontal scroll if needed */
+	-webkit-overflow-scrolling: touch; /* smoother scroll on iOS */
+  }
+  
+table {
+min-width: 100%;    /* always fill viewport width */
+table-layout: auto; /* columns shrink/grow naturally */
+}
+  
+  
 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
 th { background-color: #f2f2f2; position: sticky; top: 0; z-index: 1; }
 .pagination { margin-top: 16px; display: flex; align-items: center; gap: 12px; }
 .pagination button { padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
 .pagination button:disabled { opacity: .5; cursor: default; }
 h1 { margin: 8px 0 12px; }
+
+/* highlight active sort column */
+th.active-sort { background-color: #eaf5ea; }          /* subtle green */
+th button { display: inline-flex; align-items: center; gap: 6px; }
+.sort-indicator { opacity: 0.7; font-size: 12px; }
