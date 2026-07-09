@@ -1,0 +1,6 @@
+# Local-only datasets containing raw, unmasked email addresses.
+# The published data/latest.{json,csv} carry email_masked / email_domain only.
+data/latest.emails_incl.json
+data/latest.emails_incl.csv
+
+.DS_Store
