@@ -2,152 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ireland Tech Talent Search</title>
+  <title>GitHub Profiles in Ireland</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./styles.css">
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
-  <main class="page-shell">
-    <section class="hero">
-      <div>
-        <p class="eyebrow">Ireland Builder Radar</p>
-        <h1>Find high-signal GitHub builders across Ireland and Northern Ireland.</h1>
-        <p class="hero-copy">
-          Rank by outreach fit, career stage, university evidence, and real momentum from weekly snapshots.
-          The interface is tuned for student builders, early-career engineers, and fast-moving projects.
-        </p>
-      </div>
-      <div class="hero-note">
-        <div class="note-title">What changed</div>
-        <p>
-          “Young” is now evidence-based. Use career stage, Ireland confidence, university signal, and momentum instead of a single opaque label.
-        </p>
-        <p id="dataset-note">Loading snapshot...</p>
-      </div>
-    </section>
+  <main>
+    <h1>GitHub Profiles in Ireland</h1>
+    <p>
+      Public GitHub data for accounts listing a location in Ireland or Northern Ireland.
+      Sort any column; use the filters to narrow the table.
+    </p>
+    <p id="dataset-note" class="muted">Loading snapshot...</p>
 
-    <section class="stats-grid" aria-label="Dataset summary">
-      <article class="stat-card">
-        <div class="stat-label">Profiles</div>
-        <div class="stat-value" id="stat-total">0</div>
-      </article>
-      <article class="stat-card">
-        <div class="stat-label">Student / Early-career</div>
-        <div class="stat-value" id="stat-young">0</div>
-      </article>
-      <article class="stat-card">
-        <div class="stat-label">University signal</div>
-        <div class="stat-value" id="stat-university">0</div>
-      </article>
-      <article class="stat-card">
-        <div class="stat-label">Fast-growing</div>
-        <div class="stat-value" id="stat-fast">0</div>
-      </article>
-    </section>
-
-    <section class="toolbar" aria-label="Filters">
-      <label>
-        Quick view
-        <select id="quick-view">
-          <option value="all">All talent</option>
-          <option value="students">Likely students</option>
-          <option value="fast">Fast-growing</option>
-          <option value="student-projects">Best student projects</option>
-          <option value="high-confidence">High-confidence Ireland</option>
-        </select>
-      </label>
-      <label>
-        Search
+    <form id="filters" aria-label="Filters" onsubmit="return false">
+      <p>
+        <label for="filter-search">Search</label>
         <input id="filter-search" type="text" placeholder="login, bio, university, repo">
-      </label>
-      <label>
-        Career stage
+      </p>
+      <p>
+        <label for="filter-stage">Career stage</label>
         <select id="filter-stage">
           <option value="">All</option>
-          <option value="likely_student">Likely student</option>
-          <option value="likely_early_career">Likely early-career</option>
+          <option value="likely_student">Student</option>
+          <option value="likely_early_career">Early-career</option>
           <option value="academic_research">Academic research</option>
           <option value="industry_experienced">Industry experienced</option>
           <option value="unknown">Unknown</option>
         </select>
-      </label>
-      <label>
-        Jurisdiction
+      </p>
+      <p>
+        <label for="filter-jurisdiction">Jurisdiction</label>
         <select id="filter-jurisdiction">
           <option value="">All</option>
           <option value="Republic of Ireland">Republic of Ireland</option>
           <option value="Northern Ireland">Northern Ireland</option>
           <option value="Uncertain">Uncertain</option>
         </select>
-      </label>
-      <label>
-        Min stars
+      </p>
+      <p>
+        <label for="filter-stars">Min stars</label>
         <input id="filter-stars" type="number" min="0" value="0">
-      </label>
-      <label>
-        Min momentum
+      </p>
+      <p>
+        <label for="filter-momentum">Min momentum</label>
         <input id="filter-momentum" type="number" min="0" value="0">
-      </label>
-      <label>
-        Min Ireland confidence
+      </p>
+      <p>
+        <label for="filter-ireland-confidence">Min Ireland confidence</label>
         <select id="filter-ireland-confidence">
           <option value="0">Any</option>
           <option value="0.5">50%+</option>
           <option value="0.8">80%+</option>
           <option value="0.9">90%+</option>
         </select>
-      </label>
-      <label class="checkbox-label">
-        <input id="filter-university" type="checkbox">
-        University signal only
-      </label>
-      <label>
-        Page size
+      </p>
+      <p>
+        <label for="filter-university">
+          <input id="filter-university" type="checkbox">
+          University signal only
+        </label>
+      </p>
+      <p>
+        <label for="page-size">Page size</label>
         <select id="page-size">
           <option value="20">20</option>
           <option value="50" selected>50</option>
           <option value="100">100</option>
         </select>
-      </label>
-      <div class="toolbar-actions">
+      </p>
+      <p>
         <button id="apply-filters" type="button">Apply</button>
-        <button id="reset-filters" type="button" class="secondary">Reset</button>
-      </div>
-      <div id="row-count" class="row-count" aria-live="polite"></div>
-    </section>
+        <button id="reset-filters" type="button">Reset</button>
+      </p>
+      <p id="row-count" class="muted" aria-live="polite"></p>
+    </form>
 
-    <section class="table-panel">
-      <div class="table-wrap">
-        <table id="users-table">
-          <thead>
-            <tr>
-              <th><button data-sort="login" aria-sort="none">Profile <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="irish_confidence" aria-sort="none">Place <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="career_stage_bucket" aria-sort="none">Career stage <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="university_name" aria-sort="none">University <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="followers" aria-sort="none">Followers <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="total_stars" aria-sort="descending">Total stars <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="top_repo_stars" aria-sort="none">Top repo <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="total_contributions_last_12_months" aria-sort="none">Activity (12m) <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="stars_delta_30d" aria-sort="none">30d delta <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="momentum_score" aria-sort="none">Momentum <span class="sort-indicator"></span></button></th>
-              <th><button data-sort="outreach_score" aria-sort="none">Outreach <span class="sort-indicator"></span></button></th>
-              <th>Signals</th>
-              <th><button data-sort="email_domain" aria-sort="none">Contact <span class="sort-indicator"></span></button></th>
-            </tr>
-          </thead>
-          <tbody id="table-body"></tbody>
-        </table>
-      </div>
+    <table id="users-table">
+      <thead>
+        <tr>
+          <th><button data-sort="login" aria-sort="none">Profile <span class="sort-indicator"></span></button></th>
+          <th><button data-sort="irish_confidence" aria-sort="none">Location <span class="sort-indicator"></span></button></th>
+          <th><button data-sort="career_stage_bucket" aria-sort="none">Career stage <span class="sort-indicator"></span></button></th>
+          <th><button data-sort="university_name" aria-sort="none">University <span class="sort-indicator"></span></button></th>
+          <th><button data-sort="followers" aria-sort="none">Followers <span class="sort-indicator"></span></button></th>
+          <th><button data-sort="total_stars" aria-sort="descending">Total stars <span class="sort-indicator"></span></button></th>
+          <th><button data-sort="top_repo_stars" aria-sort="none">Top repo <span class="sort-indicator"></span></button></th>
+          <th><button data-sort="total_contributions_last_12_months" aria-sort="none">Activity (12m) <span class="sort-indicator"></span></button></th>
+          <th><button data-sort="stars_delta_30d" aria-sort="none">30d delta <span class="sort-indicator"></span></button></th>
+          <th><button data-sort="momentum_score" aria-sort="none">Momentum <span class="sort-indicator"></span></button></th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
 
-      <div class="pagination">
-        <button id="prev-page" type="button">Previous</button>
-        <span id="page-info" aria-live="polite"></span>
-        <button id="next-page" type="button">Next</button>
-      </div>
-    </section>
+    <p class="pagination">
+      <button id="prev-page" type="button">Previous</button>
+      <span id="page-info" aria-live="polite"></span>
+      <button id="next-page" type="button">Next</button>
+    </p>
   </main>
 </body>
 </html>

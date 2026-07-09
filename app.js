@@ -259,7 +259,6 @@ const minStarsFilter = () => $("filter-stars");
 const minMomentumFilter = () => $("filter-momentum");
 const minIrelandFilter = () => $("filter-ireland-confidence");
 const universityOnlyFilter = () => $("filter-university");
-const quickViewFilter = () => $("quick-view");
 const applyBtn = () => $("apply-filters");
 const resetBtn = () => $("reset-filters");
 const sortButtons = () => Array.from(document.querySelectorAll("th button[data-sort]"));
@@ -345,32 +344,6 @@ function cmp(a, b, key, dir) {
   return dir === "asc" ? result : -result;
 }
 
-function applyQuickView() {
-  const preset = quickViewFilter().value;
-  resetFilters(false);
-
-  if (preset === "students") {
-    stageFilter().value = "likely_student";
-    minStarsFilter().value = "25";
-    sortKey = "outreach_score";
-  } else if (preset === "fast") {
-    minMomentumFilter().value = "45";
-    sortKey = "momentum_score";
-  } else if (preset === "student-projects") {
-    stageFilter().value = "likely_student";
-    minStarsFilter().value = "100";
-    sortKey = "top_repo_stars";
-  } else if (preset === "high-confidence") {
-    minIrelandFilter().value = "0.8";
-    sortKey = "irish_confidence";
-  } else {
-    sortKey = "total_stars";
-  }
-
-  sortDir = "desc";
-  applyFilters();
-}
-
 function resetFilters(shouldRender = true) {
   searchInput().value = "";
   stageFilter().value = "";
@@ -380,7 +353,6 @@ function resetFilters(shouldRender = true) {
   minIrelandFilter().value = "0";
   universityOnlyFilter().checked = false;
   if (shouldRender) {
-    quickViewFilter().value = "all";
     sortKey = "total_stars";
     sortDir = "desc";
     applyFilters();
@@ -461,10 +433,6 @@ function topLanguage(row) {
 }
 
 function renderSummary() {
-  $("stat-total").textContent = num(view.length);
-  $("stat-young").textContent = num(view.filter((row) => row.is_young).length);
-  $("stat-university").textContent = num(view.filter((row) => row.university_signal).length);
-  $("stat-fast").textContent = num(view.filter((row) => row.momentum_score >= 45).length);
   $("dataset-note").textContent = meta.snapshot_date
     ? `Snapshot: ${meta.snapshot_date}${meta.fallback ? " • fallback sample data" : ""}`
     : "Snapshot unavailable";
@@ -497,18 +465,6 @@ function render() {
       ? `<a href="${row.top_repo_url}" target="_blank" rel="noopener">${escapeHTML(row.top_repo_name || "View repo")}</a>
          <div class="detail-sub">${num(row.top_repo_stars)} stars</div>`
       : `<span class="muted">—</span>`;
-    const signals = [
-      row.university_signal ? pill("University", "signal") : "",
-      row.is_young ? pill("Youth fit", "signal") : "",
-      row.momentum_score >= 45 ? pill("Fast-growing", "signal-hot") : "",
-      row.momentum_basis === "activity_proxy" ? pill("Proxy momentum", "signal-soft", "No prior historical snapshot yet.") : "",
-      topLanguage(row) ? pill(topLanguage(row), "language") : "",
-    ].join("");
-    const contact = row.email_masked
-      ? `<div class="detail-strong">${escapeHTML(row.email_masked)}</div><div class="detail-sub">${escapeHTML(row.email_domain || "")}</div>`
-      : row.email_domain
-        ? `<div class="detail-strong">${escapeHTML(row.email_domain)}</div>`
-        : `<span class="muted">No public email</span>`;
     const avatar = row.avatar_url ? `<img class="avatar" src="${row.avatar_url}" alt="${escapeHTML(row.login)} avatar">` : "";
     const profile = `<div class="profile-cell">
         <a href="${row.url || "#"}" target="_blank" rel="noopener">${avatar}</a>
@@ -541,9 +497,6 @@ function render() {
         <div class="detail-strong">${row.momentum_score.toFixed(1)}</div>
         <div class="detail-sub">${escapeHTML(row.momentum_basis)}</div>
       </td>
-      <td>${row.outreach_score.toFixed(1)}</td>
-      <td>${signals || `<span class="muted">—</span>`}</td>
-      <td>${contact}</td>
     </tr>`;
   }).join("");
 
@@ -588,7 +541,6 @@ function attachEvents() {
 
   applyBtn().addEventListener("click", applyFilters);
   resetBtn().addEventListener("click", () => resetFilters(true));
-  quickViewFilter().addEventListener("change", applyQuickView);
   prevBtn().addEventListener("click", () => {
     page -= 1;
     render();
